@@ -19,7 +19,7 @@ with open(filename, 'r') as f:
 
 df = pd.DataFrame(List, columns=columns)
 df.drop('timestamp', axis=1, inplace=True)
-test_data, train_data = train_test_split(df, test_size=0.3)
+train_data, test_data  = train_test_split(df, test_size=0.3)
 
 movies = df['movie_id'].unique()
 users = df['user_id'].unique()
@@ -75,6 +75,8 @@ for index, row in df.iterrows():
         break
     utility_mat[users_map[row['user_id']]
                 ][movie_map[row['movie_id']]] = int(row['rating'])
+
+print(utility_mat)
 
 ''' persistent storage for the utility matrix and other data '''
 
