@@ -40,8 +40,6 @@ def baseLineFilter(umat, sim, mmap, umap, ratings, mur, mmr, test, mew):
     prediction = []
 
     for i in range(int(len(test["movie_id"]) / 10)):
-        if i % 100 == 0:
-            print(i, " ", int(len(test["movie_id"]) / 10))
         user = test.iloc[i, 0]
         movie = test.iloc[i, 1]
         stars = int(test.iloc[i, 2])
@@ -154,7 +152,7 @@ def main():
         inv_map[v] = k
 
     genre_list = mapGenre()
-    user_id = "510"
+    user_id = "43"
 
     comp_start = time()
     umat = np.transpose(utility_matrix)
@@ -167,12 +165,25 @@ def main():
     comp_time = comp_end - comp_start
 
     rmse, mae = computeError(actual, prediction)
-
+    factor=18000
     print(f"load time {l_time}")
     print(f"computation time {comp_time}")
     print("root mean square error :: ", rmse)
-    print("print mean absolute error :: ",mae)
-
+    print("mean absolute error ::  ", mae)
+    threshold=3.5
+    precision=0
+    for i in range(1,944):
+        recommendations = topKRecommendation(10, mmap, sim,str(i))
+        count=0
+        for item in recommendations:
+            id = inv_map[item[1]]
+            y=i-1
+            if(id!=None):
+                index=int(id)
+                if(utility_matrix[y][index]>threshold):
+                    count=count+1
+        precision=precision+(count/100)
+    print("precision ::  ",precision*factor/943)
     recommendations = topKRecommendation(20, mmap, sim, user_id)
     
     print(f"\n\n*******Recommendation for user {user_id}*******\n")

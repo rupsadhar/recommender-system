@@ -1,11 +1,10 @@
 import pickle
+import os
+import math
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
 from time import time
-import os
-import math
-
 
 def loadFile(filename):
     '''
@@ -89,7 +88,7 @@ def userUserCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
     A=sparse_mat.transpose()
     #print(A.shape)
     pearson_similarity = cosine_similarity(A)
-    print(pearson_similarity.shape)
+    #print(pearson_similarity.shape)
     actual_rating = []
     prediction = []
     for i in range(int(len(test["movie_id"]) / 100)):
@@ -145,6 +144,7 @@ def topKRecommendation(k, movie_map, similarity, movie_id):
             #print(i)
             top_similar.append([similarity[row_no][i], i])
     top_similar.sort(reverse=True)
+    #print(top_similar)
     return top_similar[:k]
 
 
@@ -183,7 +183,42 @@ def mapGenre():
                 # if (len(list_temp) > 1):
                 #     List.append(list_temp[2])
     return List
+# def precision_recall_at_k(predictions, k=10, threshold=3.5):
+#     """Return precision and recall at k metrics for each user"""
 
+#     # First map the predictions to each user.
+#     user_est_true = defaultdict(list)
+#     for uid, _, true_r, est, _ in predictions:
+#         user_est_true[uid].append((est, true_r))
+
+#     precisions = dict()
+#     recalls = dict()
+#     for uid, user_ratings in user_est_true.items():
+
+#         # Sort user ratings by estimated value
+#         user_ratings.sort(key=lambda x: x[0], reverse=True)
+
+#         # Number of relevant items
+#         n_rel = sum((true_r >= threshold) for (_, true_r) in user_ratings)
+
+#         # Number of recommended items in top k
+#         n_rec_k = sum((est >= threshold) for (est, _) in user_ratings[:k])
+
+#         # Number of relevant and recommended items in top k
+#         n_rel_and_rec_k = sum(((true_r >= threshold) and (est >= threshold))
+#                               for (est, true_r) in user_ratings[:k])
+
+#         # Precision@K: Proportion of recommended items that are relevant
+#         # When n_rec_k is 0, Precision is undefined. We here set it to 0.
+
+#         precisions[uid] = n_rel_and_rec_k / n_rec_k if n_rec_k != 0 else 0
+
+#         # Recall@K: Proportion of relevant items that are recommended
+#         # When n_rel is 0, Recall is undefined. We here set it to 0.
+
+#         recalls[uid] = n_rel_and_rec_k / n_rel if n_rel != 0 else 0
+
+#     return precisions, recalls
 
 def main():
     load_time_start = time()
@@ -195,6 +230,7 @@ def main():
     movie = loadFile("movie")
     load_time_end = time()
     load_time = load_time_end - load_time_start
+    #print(test_data)
     print("time taken to load  ", load_time, 's')
 
     inv_map = {}
@@ -202,8 +238,8 @@ def main():
         inv_map[v] = k
 
     genre_list = mapGenre()
-    user_id = "510"
-
+    user_id = "43"
+    factor=18000
     comp_time_start = time()
     utility_matrix = utility_matrix.astype("float")
     actual_rating, prediction, similarity = userUserCollabFilter(
@@ -211,12 +247,35 @@ def main():
     rmse, mae = computeError(actual_rating, prediction)
     comp_time_end = time()
     comp_time = comp_time_end - comp_time_start
+    
+
+    n=943*1683
+    spearman=1-(6*rmse*rmse*n*n)/(n*(n**2-1)) 
     print("computation time ::  ", comp_time / 60, 'min')
     print("root mean square error ::  ", rmse)
     print("mean absolute error ::  ", mae)
+    print("spearman correlation ::  ", spearman)
+    
 
+    threshold=3.5
+    precision=0
+    for i in range(1,944):
+        recommendations = topKRecommendation(10, movies_map, similarity,str(i))
+        count=0
+        for item in recommendations:
+            id = inv_map[item[1]]
+            y=i-1
+            if(utility_matrix[y][int(id)]>threshold):
+                count=count+1
+        precision=precision+(count/100)
+    print("precision ::  ",precision*factor/943)
+
+
+    # precisions, recalls = precision_recall_at_k(prediction, k=5, threshold=4)
+
+    # Precision and recall can then be averaged over all users
+    # print(sum(prec for prec in precisions.values()) / len(precisions))
     recommendations = topKRecommendation(20, movies_map, similarity, user_id)
-
     print(f"\n\n*******Recommendation for user - user filter for user {user_id}*******\n")
     for item in recommendations:
         id = inv_map[item[1]]
@@ -227,13 +286,22 @@ def main():
     utility_matrix = utility_matrix.astype("float")
     actual_rating, prediction, similarity = itemItemCollabFilter(
         utility_matrix, test_data, movies_map, users_map, ratings)
+    # print(actual_rating)
+    # counter=0
+    # for x in actual_rating:
+    #     if(x>3):
+    #         dif=abs(actual_rating-prediction[counter])
+    #     counter=counter+1
+
+    # print(prediction)
     rmse, mae = computeError(actual_rating, prediction)
+    spearman=1-(6*rmse*rmse*n*n)/(n*(n**2-1)) 
     comp_time_end = time()
     comp_time = comp_time_end - comp_time_start
     print("\n\n\ncomputation time ::  ", comp_time / 60, 'min')
     print("root mean square error ::  ", rmse)
     print("mean absolute error ::  ", mae)
-
+    print("spearman correlation ::  ", spearman)
     recommendations = topKRecommendation(20, movies_map, similarity, user_id)
 
     print(f"\n\n*******Recommendation for item - item filter for user {user_id}*******\n")
