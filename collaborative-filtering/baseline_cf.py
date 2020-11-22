@@ -133,7 +133,7 @@ def mapGenre():
                     
                     # itr=itr+1
                 List.append(list2)
-                
+
     return List
 
 
@@ -166,13 +166,15 @@ def main():
         umat, sim, mmap, umap, ratings, mur, mmr, test, mew)
     comp_end = time()
     comp_time = comp_end - comp_start
-
+    n=943*1683
     rmse, mae = computeError(actual, prediction)
+    spearman=1-(6*rmse*rmse*n*n)/(n*(n**2-1)) 
     factor=18000
     print(f"load time {l_time}")
     print(f"computation time {comp_time}")
     print("root mean square error :: ", rmse)
     print("mean absolute error ::  ", mae)
+    print("spearman correlation ::  ", spearman)
     threshold=3.5
     precision=0
     for i in range(1,944):
