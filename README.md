@@ -17,5 +17,5 @@ $ python3 filename.py
 
 ### Note 
 * docs folder has Code_Documentation ( html ) & Design_Document
-* Dataset is available in folder dna_data
+* Dataset is available in folder data
 
