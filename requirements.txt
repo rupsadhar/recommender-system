@@ -1,0 +1,5 @@
+numpy==1.17.4
+pandas==1.0.5
+scipy==1.4.1
+Sphinx==3.2.1
+pickleshare==0.7.5
