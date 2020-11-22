@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
+import pickle
 
 path = os.path.abspath("./data")
 file1 = os.path.join(path,"ml-100k/u.data")
@@ -42,3 +43,6 @@ for index, row in rating_df.iterrows():
 
 print(utility_mat)
 print(utility_mat.shape)
+
+file2 = open("utility", 'wb+')
+pickle.dump(utility_mat,file2)
