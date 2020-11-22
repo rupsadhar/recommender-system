@@ -7,7 +7,8 @@ import os
 
 def loadFile(filename):
     '''
-    Loads file saved after running preprocess.py.
+    Loads file saved after running preprocess_cl.py.
+    param:filename
     return: opened file object
     '''
     file = open(filename, 'rb')
@@ -18,6 +19,7 @@ def loadFile(filename):
 def meanRating(matrix):
     '''
     calculated mean rating of give parameter matrix
+    param: matrix
     return: mean_rating calculated
     '''
     mean_rating = matrix.sum(axis=1)
@@ -34,6 +36,7 @@ def meanRating(matrix):
 def baseLineFilter(umat, sim, mmap, umap, ratings, mur, mmr, test, mew):
     '''
     Fills utility matrix using baseline approach of collaborative filtering
+    param : umat, sim, mmap, umap, ratings, mur, mmr, test, mew
     return: prediction and rating
     '''
     rating = []
@@ -73,6 +76,7 @@ def baseLineFilter(umat, sim, mmap, umap, ratings, mur, mmr, test, mew):
 def computeError(actual_rating, prediction):
     '''
     Computes root mean square error and mean absolute error
+    param: actual_rating, prediction
     return: rmse -- root mean square (float)
             mean -- mean absolute error (float)
     '''
@@ -87,6 +91,7 @@ def computeError(actual_rating, prediction):
 def topKRecommendation(k, movie_map, similarity, movie_id):
     '''
     Generates top k recommendations similar to a movie
+    param : k, movie_map, similarity, movie_id
     return: top_similar -- list of tuples(similarity, movie_no)
     '''
     row_no = movie_map[movie_id]
@@ -128,9 +133,7 @@ def mapGenre():
                     
                     # itr=itr+1
                 List.append(list2)
-                #print(list2)
-                # if (len(list_temp) > 1):
-                #     List.append(list_temp[2])
+                
     return List
 
 
