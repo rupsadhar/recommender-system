@@ -8,9 +8,11 @@ from time import time
 
 def loadFile(filename):
     '''
-    Loads file saved after running preprocess.py.
+    Loads file saved after running preprocess_cl.py.
+    param:filename
     return: opened file object
     '''
+
     file = open(filename, 'rb')
     filename = pickle.load(file)
     return filename
@@ -19,6 +21,7 @@ def loadFile(filename):
 def centredCosine(utility_matrix):
     '''
     Converts a matrix to its centerd cosine.
+    param: utility_matrix
     return: centred cosine matrix
     '''
     utility_matrix = utility_matrix.astype("float")
@@ -37,6 +40,7 @@ def centredCosine(utility_matrix):
 def itemItemCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
     '''
     Fills the spaces in the utility matrix using the test set data
+    param: utility_matrix, test, movies_map, users_map, ratings
     return: actual rating -- List
             prediction -- List
             pearson similarity - 2d numpy matrix
@@ -49,8 +53,6 @@ def itemItemCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
     actual_rating = []
     prediction = []
     for i in range(int(len(test["movie_id"]) / 10)):
-        # if i % 100 == 0:
-        #     # print(i, " ", int(len(test["movie_id"]) / 10))
         user = test.iloc[i, 0]
         movie = test.iloc[i, 1]
         rating = test.iloc[i, 2]
@@ -58,7 +60,6 @@ def itemItemCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
         user = users_map[str(user)]
         actual_rating.append(int(rating))
 
-        ''' calculating the weighted mean '''
         weighted_sum = 0
         weight = 0
         sim_movie = pearson_similarity[movie]
@@ -77,6 +78,7 @@ def itemItemCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
 def userUserCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
     '''
     Fills the spaces in the utility matrix using the test set data
+    param: utility_matrix, test, movies_map, users_map, ratings
     return: actual rating -- List
             prediction -- List
             pearson similarity - 2d numpy matrix
@@ -101,7 +103,6 @@ def userUserCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
         user = users_map[str(user)]
         actual_rating.append(int(rating))
 
-        ''' calculating the weighted mean '''
         weighted_sum = 0
         weight = 0
         sim_user = pearson_similarity[user]
@@ -120,6 +121,7 @@ def userUserCollabFilter(utility_matrix, test, movies_map, users_map, ratings):
 def computeError(actual_rating, prediction):
     '''
     Computes root mean square error and mean absolute error
+    param: actual_rating, prediction
     return: rmse -- root mean square (float)
             mean -- mean absolute error (float)
     '''
@@ -134,6 +136,7 @@ def computeError(actual_rating, prediction):
 def topKRecommendation(k, movie_map, similarity, movie_id):
     '''
     Generates top k recommendations similar to a movie
+    param: k, movie_map, similarity, movie_id
     return: top_similar -- list of tuples(similarity, movie_no)
     '''
     row_no = movie_map[movie_id]
@@ -150,6 +153,10 @@ def topKRecommendation(k, movie_map, similarity, movie_id):
 
 
 def mapGenre():
+    '''
+        Generates genre array
+        return: genre_list -- list of genres based on id
+    '''
     path = os.path.abspath('../data')
     filename = os.path.join(path,"ml-100k/u.item")
     filename2 = os.path.join(path,"ml-100k/u.genre")
@@ -166,59 +173,17 @@ def mapGenre():
                 fin_gen.append(gen_list[0])
             for li in data:
                 list_temp = li.split("|")
-                #print(list_temp)
-                #print(fin_gen)
-                #itr = 5
                 list2 =[]
                 for i in range(5,len(list_temp)-1):
-                    #print(i)
 
                     if(int(list_temp[i])==1):
                         ind=i-5
                         list2.append(fin_gen[ind])
                     
-                    # itr=itr+1
+                   
                 List.append(list2)
-                #print(list2)
-                # if (len(list_temp) > 1):
-                #     List.append(list_temp[2])
     return List
-# def precision_recall_at_k(predictions, k=10, threshold=3.5):
-#     """Return precision and recall at k metrics for each user"""
 
-#     # First map the predictions to each user.
-#     user_est_true = defaultdict(list)
-#     for uid, _, true_r, est, _ in predictions:
-#         user_est_true[uid].append((est, true_r))
-
-#     precisions = dict()
-#     recalls = dict()
-#     for uid, user_ratings in user_est_true.items():
-
-#         # Sort user ratings by estimated value
-#         user_ratings.sort(key=lambda x: x[0], reverse=True)
-
-#         # Number of relevant items
-#         n_rel = sum((true_r >= threshold) for (_, true_r) in user_ratings)
-
-#         # Number of recommended items in top k
-#         n_rec_k = sum((est >= threshold) for (est, _) in user_ratings[:k])
-
-#         # Number of relevant and recommended items in top k
-#         n_rel_and_rec_k = sum(((true_r >= threshold) and (est >= threshold))
-#                               for (est, true_r) in user_ratings[:k])
-
-#         # Precision@K: Proportion of recommended items that are relevant
-#         # When n_rec_k is 0, Precision is undefined. We here set it to 0.
-
-#         precisions[uid] = n_rel_and_rec_k / n_rec_k if n_rec_k != 0 else 0
-
-#         # Recall@K: Proportion of relevant items that are recommended
-#         # When n_rel is 0, Recall is undefined. We here set it to 0.
-
-#         recalls[uid] = n_rel_and_rec_k / n_rel if n_rel != 0 else 0
-
-#     return precisions, recalls
 
 def main():
     load_time_start = time()
@@ -230,7 +195,6 @@ def main():
     movie = loadFile("movie")
     load_time_end = time()
     load_time = load_time_end - load_time_start
-    #print(test_data)
     print("time taken to load  ", load_time, 's')
 
     inv_map = {}
@@ -271,29 +235,19 @@ def main():
     print("precision ::  ",precision*factor/943)
 
 
-    # precisions, recalls = precision_recall_at_k(prediction, k=5, threshold=4)
 
-    # Precision and recall can then be averaged over all users
-    # print(sum(prec for prec in precisions.values()) / len(precisions))
     recommendations = topKRecommendation(20, movies_map, similarity, user_id)
-    print(f"\n\n*******Recommendation for user - user filter for user {user_id}*******\n")
+    print(f"\n\n*******Recommendation for user - user collaborative filter for user {user_id}*******\n")
     for item in recommendations:
         id = inv_map[item[1]]
-        #print(movie[id])
+
         print(movie[id], " ", genre_list[int(id)])
 
     comp_time_start = time()
     utility_matrix = utility_matrix.astype("float")
     actual_rating, prediction, similarity = itemItemCollabFilter(
         utility_matrix, test_data, movies_map, users_map, ratings)
-    # print(actual_rating)
-    # counter=0
-    # for x in actual_rating:
-    #     if(x>3):
-    #         dif=abs(actual_rating-prediction[counter])
-    #     counter=counter+1
-
-    # print(prediction)
+  
     rmse, mae = computeError(actual_rating, prediction)
     spearman=1-(6*rmse*rmse*n*n)/(n*(n**2-1)) 
     comp_time_end = time()
@@ -304,10 +258,9 @@ def main():
     print("spearman correlation ::  ", spearman)
     recommendations = topKRecommendation(20, movies_map, similarity, user_id)
 
-    print(f"\n\n*******Recommendation for item - item filter for user {user_id}*******\n")
+    print(f"\n\n*******Recommendation for item - item collaborative filter for user {user_id}*******\n")
     for item in recommendations:
         id = inv_map[item[1]]
-        #print(movie[id])
         print(movie[id], " ", genre_list[int(id)])
 
     file_handler = open("similarity", 'wb+')
