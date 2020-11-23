@@ -36,13 +36,14 @@ a = 0
 
 for index, row in rating_df.iterrows():
     a += 1
-    print(a, "/", rating_df.shape[0])
+    #print(a, "/", rating_df.shape[0])
     if a == len(rating_df) - 1:
         break
     utility_mat[int(row['user_id'])-1][int(row['movie_id'])-1] = int(row['rating'])
 
-print(utility_mat)
-print(utility_mat.shape)
+
 
 file2 = open("utility", 'wb+')
 pickle.dump(utility_mat,file2)
+
+
